@@ -463,7 +463,8 @@ def num_eval(gt, predictions, models, setting='gaussian', T_range=10000, verbose
     return out
 
 
-@hydra.main(config_path='conf/eval.yaml')
+# @hydra.main(config_path='conf', config_name='eval')
+@hydra.main(config_path='conf', config_name='cartpole_lqr')
 def evaluate(cfg):
     # print("here")
     name = cfg.env.label

@@ -123,7 +123,7 @@ def collect_data_lqr(cfg, plot=False):  # Creates horizon^2/2 points
     :return: an array of DotMaps, where each DotMap contains info about a trajectory
     """
 
-    env_model = cfg.env.name
+    env_model = "Cartpole-v0"
     env = gym.make(env_model)
     # if (cfg.video):
     # env = Monitor(env, hydra.utils.get_original_cwd() + '/trajectories/reacher/video',
@@ -229,7 +229,7 @@ def log_hyperparams(cfg):
 #             Main Functions              #
 ###########################################
 
-@hydra.main(config_path='conf/cartpole_lqr.yaml')
+@hydra.main(config_path='conf', config_name='cartpole_lqr')
 def contpred(cfg):
     train = cfg.mode == 'train'
     # Collect data

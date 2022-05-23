@@ -6,6 +6,7 @@ import hydra
 import numpy as np
 import plotly.graph_objects as go
 import plotly
+from plotly.subplots import make_subplots
 
 import matplotlib.pyplot as plt
 import matplotlib.colors as colors
@@ -498,7 +499,7 @@ def plot_loss(train_logs, test_logs, cfg, save_loc=None, show=False, title=None)
     """
     assert setup, "Must run setup_plotting before this function"
 
-    fig = plotly.subplots.make_subplots(rows=1, cols=1,
+    fig = make_subplots(rows=1, cols=1,
                                         # subplot_titles=("Position", "Action - Torques"),
                                         vertical_spacing=.15)  # go.Figure()
     colors = [
