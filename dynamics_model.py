@@ -390,6 +390,10 @@ class DynamicsModel(object):
         self.delta = cfg.model.delta
         self.train_target = cfg.model.training.train_target
         self.control_params = cfg.model.training.control_params
+        self.state_indices_out = cfg.model.training.state_indices_out
+        if not self.state_indices_out:
+            self.state_indices_out = self.state_indices
+            
         if env == "Reacher":
             self.state_indices = cfg.model.training.state_indices
         elif env == "Lorenz" or env == "SS":
@@ -412,7 +416,8 @@ class DynamicsModel(object):
         else:
             self.n_in += cfg.env.action_size
 
-        self.n_out = len(self.state_indices)
+        # self.n_out = len(self.state_indices) # self.state_indices_out
+        self.n_out = len(self.state_indices_out)
         if self.prob:
             # ordering matters here, because size is the number of predicted output states
             self.loss_fn = ProbLoss(self.n_out)
@@ -431,7 +436,7 @@ class DynamicsModel(object):
         # LSTM takes in a variable length object and predicts the next in the future.
         if type(x) == np.ndarray:
             x = torch.from_numpy(np.float64(x))
-        prediction = torch.zeros((x.shape[0], num_traj, len(self.state_indices)))
+        prediction = torch.zeros((x.shape[0], num_traj, len(self.state_indices_out))) # self.state_indices_out
         assert np.ndim(x) == 3, "Not correct num of dim for LSTM (seq_len, batch, input_size)"
 
         for n in self.nets:
@@ -451,7 +456,8 @@ class DynamicsModel(object):
         """
         if type(x) == np.ndarray:
             x = torch.from_numpy(np.float64(x))
-        prediction = torch.zeros((x.shape[0], len(self.state_indices)))
+        # prediction = torch.zeros((x.shape[0], len(self.state_indices))) # self.state_indices_out
+        prediction = torch.zeros((x.shape[0], len(self.state_indices_out)))
         for n in self.nets:
             scaledInput = n.testPreprocess(x, self.cfg)
             if self.prob:
@@ -461,7 +467,8 @@ class DynamicsModel(object):
                 prediction += n.testPostprocess(n.forward(scaledInput)) / len(self.nets)
                 # prediction += n.forward(scaledInput) / len(self.nets)
         if not self.delta:
-            return prediction[:, :len(self.state_indices)]
+            # return prediction[:, :len(self.state_indices)] # self.state_indices_out
+            return prediction[:, :len(self.state_indices_out)]
         else:
             # This hardcode is the state size changing. X also includes the action / index
             return x[:, :len(self.state_indices)] + prediction
@@ -475,12 +482,12 @@ class DynamicsModel(object):
             dataset = (np.hstack((dataset[0][:, self.state_indices],
                                   # dataset[0][:, (self.cfg.env.state_size - len(self.state_indices)):])),
                                   dataset[0][:, [self.cfg.env.state_size]])),
-                       dataset[1][:, self.state_indices])
+                       dataset[1][:, self.state_indices_out]) # self.state_indices_out
         else:
             dataset = (np.hstack((dataset[0][:, self.state_indices],
                                   # dataset[0][:, (self.cfg.env.state_size - len(self.state_indices)):])),
                                   dataset[0][:, self.cfg.env.state_size:])),
-                       dataset[1][:, self.state_indices])
+                       dataset[1][:, self.state_indices_out]) # self.state_indices_out
 
         if self.ens:
             from sklearn.model_selection import KFold  # for dataset

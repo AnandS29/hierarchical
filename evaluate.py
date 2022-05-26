@@ -166,7 +166,7 @@ def test_models(test_data, models, verbose=False, env=None, compute_action=False
     if len(np.shape(actions)) == 2:
         actions = np.expand_dims(actions, axis=2)
     # Iterate through each type of model for evaluation
-    predictions = {key: [states[:, 0, models[key].state_indices]] for key in models}
+    predictions = {key: [states[:, 0, models[key].state_indices_out]] for key in models}
     currents = {key: states[:, 0, models[key].state_indices] for key in models}
 
     variances = {key: [] for key in models}
@@ -249,7 +249,6 @@ def test_models(test_data, models, verbose=False, env=None, compute_action=False
                         dat.append(K_param)
                     prediction = np.array(model.predict(np.hstack(dat)).detach())
 
-
                 else:
                     if env == 'lorenz':
                         prediction = model.predict(np.array(currents[key]))
@@ -276,16 +275,17 @@ def test_models(test_data, models, verbose=False, env=None, compute_action=False
                     var = forward_var(model, f).detach().numpy()
                 else:
                     var = np.zeros(np.shape(initials[:, indices]))
-
+                
                 predictions[key].append(prediction)
                 currents[key] = prediction.squeeze()
                 variances[key].append(var)
+                # print(predictions[key])
 
     variances = {key: np.stack(variances[key]).transpose([1, 0, 2]) for key in variances}
     predictions = {key: np.array(predictions[key]).transpose([1, 0, 2]) for key in predictions}
 
     # MSEs = {key: np.square(states[:, :, ind_dict[key]] - predictions[key]).mean(axis=2)[:, 1:] for key in predictions}
-
+    # print("D", D)
     MSEscaled = {}
     for key in predictions:
         # scaling of error
@@ -298,14 +298,14 @@ def test_models(test_data, models, verbose=False, env=None, compute_action=False
             pred_key = np.arange(np.shape(predictions[key][0])[1])
         else:
             ind_dict[key] = np.arange(D) #np.shape(prediction)[1])
-            pred_key = np.arange(D) #np.shape(predictions[key][0])[1])  # changed from np.arange(np.shape(prediction)[1])
+            pred_key = np.arange(len(models[key].state_indices_out)) #np.shape(predictions[key][0])[1])  # changed from np.arange(np.shape(prediction)[1])
         if t_range < np.shape(states)[1]:
             l = t_range
         else:
             l = np.shape(states)[1]
-        min_states = np.min(states[:, :l, ind_dict[key]], axis=(0, 1))
-        max_states = np.ptp(states[:, :l, ind_dict[key]], axis=(0, 1))
-        scaled_states = (states[:, :l, ind_dict[key]] - min_states) / max_states
+        min_states = np.min(states[:, :l, models[key].state_indices_out], axis=(0, 1))
+        max_states = np.ptp(states[:, :l, models[key].state_indices_out], axis=(0, 1))
+        scaled_states = (states[:, :l, models[key].state_indices_out] - min_states) / max_states
         scaled_pred = (predictions[key][:, :, pred_key] - min_states) / max_states
         MSEscaled[key] = np.square(scaled_states - scaled_pred).mean(axis=2)[:, 1:]
         # print(key)
@@ -487,7 +487,7 @@ def evaluate(cfg):
         else:
             model_types = cfg.plotting.models
         models = {}
-        if cfg.data_mode_plot != 'stable':
+        if cfg.data_mode_plot not in ['stable', 'lstm', 't']:
             f = hydra.utils.get_original_cwd() + '/models/' + cfg.env.label + '/' + cfg.data_mode_plot + '/'
         else:
             f = hydra.utils.get_original_cwd() + '/models/' + cfg.env.label + '/'
@@ -551,7 +551,7 @@ def evaluate(cfg):
             else:
                 mse = {key: MSEs[key][i].squeeze() for key in MSEs}
             mse_sub = {key: [(x if x < 10 ** 5 else float("nan")) for x in mse[key]] for key in mse}
-            if not cfg.plotting.copies:
+            if not cfg.plotting.copies or cfg.plotting.copies == 1:
                 pred = {key: predictions[key][i] for key in predictions}
                 var = {key: variances[key][i] for key in variances}
             if cfg.plotting.all:
@@ -564,7 +564,7 @@ def evaluate(cfg):
                     idx = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
                 elif name == 'cartpole':
                     gt = gt[:, [0, 1, 2, 3]]
-                    idx = [0, 1, 2, 3]
+                    idx = cfg.model.training.state_indices_out # [0, 1, 2, 3]
                 elif name == 'crazyflie':
                     # gt = gt[:,[0,1,2,3,4,5,6,7,8,9,10,11]]
                     # idx = [0,1,2,3,4,5,6,7,8,9,10,11]

@@ -11,9 +11,9 @@ PID_test: false
 #determines whether target is part of input data
 train_target: true
 control_params: true
-copies: 5
+copies: 1
 
-num_trials: 100
+num_trials: 1000
 data_mode: unstable
 trial_timesteps: 100
 data_dir: l100_t100_unstable.dat
@@ -27,13 +27,13 @@ env:
   target_size: 0
 
 model:
-  str: lstm
+  str: t_cartpole
   traj: True
   prob: False # Weird n_out error - why times 2?
-  copies: 5 #5
+  copies: 1 #5
   ensemble: True
   delta: False
-  lstm: True
+  lstm: false
   gp: False # Use GP or NN
   training:
     control_params: True
@@ -41,17 +41,18 @@ model:
     filter_rate: 0.0
     t_range: 200
     state_indices: [0,1,2,3]
+    state_indices_out: [0,1,2]
     hid_width: 10
     hid_depth: 5
     E: 5 #5
   optimizer:
-    epochs: 10 #10
+    epochs: 20 #10
     batch: 32
     name: adam
     lr: 0.9
     split: 0.8
     regularization: 0.0
-    max_size: 10
+    max_size: 64
   preprocess:
     state:
       _target_: sklearn.preprocessing.StandardScaler
@@ -67,7 +68,7 @@ model:
       _target_: sklearn.preprocessing.MinMaxScaler
       feature_range: [-1.,1.]
   plotting:
-    label: LSTM Traj.
+    label: Cartpole Traj.
     color: '#ffffff'
     color_plotly: rgb(100,100,100)
     marker: s
@@ -101,13 +102,13 @@ plotting:
 #  - t_8e
 #  - t_12e
 #  - t_16e
-  - t
+    - t_cartpole
 #  - te
 #  - tp
 #  - tpe
-#  - lstm
+    # - lstm
   # - lstm_d
-#  - rnn
+  # - rnn
   num_eval_train: 0
   num_eval_test: 10
   train_set: false
@@ -117,8 +118,8 @@ plotting:
   legend: true
   t_range: 200
   mse_y_max: 2 #5
-  copies: 5
+  copies: 1
   states: true
   mse: true
   sorted: false
-data_mode_plot: unstable
+data_mode_plot: t

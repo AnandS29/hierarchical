@@ -446,11 +446,11 @@ def plot_states(ground_truth, predictions, variances=None, idx_plot=None, plot_a
         ax.spines['top'].set_visible(False)
 
         plt.plot(gt, c='k', label='gt')
+
         for key in predictions:
-            # print(key)
             pred = predictions[key][:, i]
 
-            if key == 'lstm_d':
+            if True or key == 'lstm_d':
                 color_dict[key] = '#800080'
                 marker_dict[key] = "*"
 
