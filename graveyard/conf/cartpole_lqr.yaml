@@ -1,0 +1,125 @@
+defaults:
+  - models: t
+  - envs: cartpole
+
+mode: collect # train or collect
+#model_dir: l400_t100_v4.dat
+exper_dir: false # set to a name to save models within a subfolder in the models directory
+plot: false
+video: false
+PID_test: false
+#determines whether target is part of input data
+train_target: true
+control_params: true
+copies: 1
+
+num_trials: 1000
+data_mode: unstable
+trial_timesteps: 100
+data_dir: l100_t100_unstable.dat
+
+env:
+  name: Cartpole-v0
+  label: cartpole
+  state_size: 4
+  action_size: 1
+  param_size: 4
+  target_size: 0
+
+model:
+  str: t_cartpole
+  traj: True
+  prob: False # Weird n_out error - why times 2?
+  copies: 1 #5
+  ensemble: True
+  delta: False
+  lstm: false
+  gp: False # Use GP or NN
+  training:
+    control_params: True
+    train_target: True
+    filter_rate: 0.0
+    t_range: 200
+    state_indices: [0,1,2,3]
+    state_indices_out: [0,1,2]
+    hid_width: 10
+    hid_depth: 5
+    E: 5 #5
+  optimizer:
+    epochs: 20 #10
+    batch: 32
+    name: adam
+    lr: 0.9
+    split: 0.8
+    regularization: 0.0
+    max_size: 64
+  preprocess:
+    state:
+      _target_: sklearn.preprocessing.StandardScaler
+    action:
+      _target_: sklearn.preprocessing.MinMaxScaler
+      feature_range: [-1.,1.]
+    output:
+      _target_: sklearn.preprocessing.StandardScaler
+    index:
+      _target_: sklearn.preprocessing.MinMaxScaler
+      feature_range: [-1.,1.]
+    param:
+      _target_: sklearn.preprocessing.MinMaxScaler
+      feature_range: [-1.,1.]
+  plotting:
+    label: Cartpole Traj.
+    color: '#ffffff'
+    color_plotly: rgb(100,100,100)
+    marker: s
+    marker_plotly: cross-open-dot
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ./outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  job:
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: ['random_seed']
+
+plotting:
+  models:
+  # - d
+  # - pe
+#  - de
+#  - p
+#  - de
+#  - p
+#  - pe
+#  - t_1e
+#  - t_3e
+#  - t_5e
+#  - t_8e
+#  - t_12e
+#  - t_16e
+    - t_cartpole
+#  - te
+#  - tp
+#  - tpe
+    # - lstm
+  # - lstm_d
+  # - rnn
+  num_eval_train: 0
+  num_eval_test: 10
+  train_set: false
+  plot_states: false
+  all: true
+  compute_action: false
+  legend: true
+  t_range: 200
+  mse_y_max: 2 #5
+  copies: 1
+  states: true
+  mse: true
+  sorted: false
+data_mode_plot: t

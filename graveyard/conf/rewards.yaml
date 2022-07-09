@@ -1,0 +1,23 @@
+defaults:
+  - envs: reacher
+
+exper_dir: false # set to a name to load models from within a subfolder in the models directory
+plot: false
+
+traj_model: t
+step_model: d
+split: .8
+
+hydra:
+  run:
+    dir: ./outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+  sweep:
+    dir: ./outputs/${now:%Y-%m-%d}/${now:%H-%M-%S}
+    subdir: ${hydra.job.num}
+  job:
+    config:
+      override_dirname:
+        kv_sep: '='
+        item_sep: ','
+        exclude_keys: ['random_seed']
+

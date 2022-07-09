@@ -1,0 +1,34 @@
+env:
+  name: Cartpole-v0
+  label: cartpole
+  state_size: 4
+  action_size: 1
+  param_size: 4
+  target_size: 0
+
+data_dir: l400_t100_v1.dat #l200_t100_chaotic.dat #l200_t100_v4.dat # v4 is normal l200 l400_t1250_v1.dat #
+num_trials: 100
+trial_timesteps: 200
+data_mode: chaotic
+
+model:
+  training:
+    t_range: 200
+    state_indices: [0,1,2,3]
+  preprocess:
+    state:
+      class: sklearn.preprocessing.StandardScaler
+    action:
+      class: sklearn.preprocessing.MinMaxScaler
+      params:
+        feature_range: [-1.,1.]
+    output:
+      class: sklearn.preprocessing.StandardScaler
+    index:
+      class: sklearn.preprocessing.MinMaxScaler
+      params:
+        feature_range: [-1.,1.]
+    param:
+      class: sklearn.preprocessing.MinMaxScaler
+      params:
+        feature_range: [-1.,1.]

@@ -1,0 +1,48 @@
+model:
+  str: tpe
+  prob: true
+  ensemble: true
+  traj: true
+  delta: false
+  gp: false
+  lstm: false
+  training:
+    hid_width: 250
+    hid_depth: 2
+    E: 5
+    # Note: these do nothing for non trajectory based models
+    train_target: true
+    control_params: true
+    filter_rate: 0.95
+    num_traj: 50
+  optimizer:
+    epochs: 30
+    batch: 64
+    name: Adam
+    split: .8
+    lr: .0008
+    regularization: 0
+    max_size: 100000
+#  preprocess:
+#    state:
+#      class: sklearn.preprocessing.StandardScaler
+#        #Choose between standard scaler and min max scaler
+#        #class: sklearn.preprocessing.MinMaxScaler
+#      #params:
+#      #feature_range: [-1.,1.]
+#    index:
+#      class: sklearn.preprocessing.MinMaxScaler
+#      params:
+#        feature_range: [-1.,1.]
+#    param:
+#      class: sklearn.preprocessing.MinMaxScaler
+#      params:
+#        feature_range: [-1.,1.]
+#    output:
+#      class: sklearn.preprocessing.StandardScaler
+  plotting:
+    label: Trajectory Based Probabilistic Ensemble
+    color: '#b57f11'
+    color_plotly: rgb(180,180,25)
+    marker: p
+    marker_plotly: hash-open-dot
